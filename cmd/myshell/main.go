@@ -13,7 +13,7 @@ func main() {
 		fmt.Fprint(os.Stdout, "$ ")
 		cmd, err := bufio.NewReader(os.Stdin).ReadString('\n')
 
-		commands := []string{"echo", "exit"}
+		commands := []string{"echo", "exit", "type"}
 
 		if err != nil {
 			fmt.Println(err)
