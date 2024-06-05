@@ -2,11 +2,8 @@ package main
 
 import (
 	"bufio"
-
 	"fmt"
-
 	"os"
-
 	"strings"
 )
 
@@ -22,9 +19,12 @@ func main() {
 
 		cmd = strings.TrimSpace(cmd)
 
-		switch cmd {
-		case "exit 0":
+		switch {
+		case cmd == "exit 0":
 			os.Exit(0)
+		case strings.HasPrefix(cmd, "echo "):
+			output := strings.TrimPrefix(cmd, "echo ")
+			fmt.Printf("%s\n", output)
 		default:
 			fmt.Printf("%s: command not found\n", cmd)
 		}
