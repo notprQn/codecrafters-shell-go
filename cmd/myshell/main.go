@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"slices"
+	"path/filepath"
 	"strings"
 )
 
@@ -33,14 +33,38 @@ func main() {
 		case strings.HasPrefix(cmd, "type "):
 			output := strings.TrimPrefix(cmd, "type ")
 
-			if slices.Contains(commands, output) {
+			if contains(commands, output) {
 				fmt.Printf("%s is a shell builtin\n", output)
 			} else {
-				fmt.Printf("%s not found\n", output)
+				path := os.Getenv("PATH")
+				paths := strings.Split(path, ":")
+
+				found := false
+				for _, p := range paths {
+					fullPath := filepath.Join(p, output)
+					if _, err := os.Stat(fullPath); err == nil {
+						fmt.Printf("%s is %s\n", output, fullPath)
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					fmt.Printf("%s: command not found\n", output)
+				}
 			}
 
 		default:
 			fmt.Printf("%s: command not found\n", cmd)
 		}
 	}
+}
+
+func contains(slice []string, item string) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
 }
