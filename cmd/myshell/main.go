@@ -50,12 +50,12 @@ func main() {
 				}
 
 				if !found {
-					fmt.Printf("%s: command not found\n", output)
+					fmt.Printf("%s: not found\n", output)
 				}
 			}
 
 		default:
-			fmt.Printf("%s: command not found\n", cmd)
+			fmt.Printf("%s: not found\n", cmd)
 		}
 	}
 }
