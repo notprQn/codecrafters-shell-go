@@ -29,7 +29,7 @@ func main() {
 		cmdName := cmdFields[0]
 		cmdArgs := cmdFields[1:]
 
-		commands := []string{"echo", "exit", "type", "pwd"}
+		commands := []string{"echo", "exit", "type", "pwd", "cd"}
 
 		switch cmdName {
 		case "exit":
@@ -73,6 +73,17 @@ func main() {
 				continue
 			}
 			fmt.Println(dir)
+
+		case "cd":
+			if len(cmdArgs) == 0 {
+				fmt.Println("cd: missing operand")
+				continue
+			}
+			newDir := cmdArgs[0]
+			err := os.Chdir(newDir)
+			if err != nil {
+				fmt.Printf("cd: %s: No such file or directory\n", newDir)
+			}
 
 		default:
 			path := os.Getenv("PATH")
