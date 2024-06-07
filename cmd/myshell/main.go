@@ -80,6 +80,18 @@ func main() {
 				continue
 			}
 			newDir := cmdArgs[0]
+			if strings.HasPrefix(newDir, "~") {
+				homeDir, err := os.UserHomeDir()
+				if err != nil {
+					fmt.Println("cd: cannot determine home directory")
+					continue
+				}
+				if newDir == "~" {
+					newDir = homeDir
+				} else {
+					newDir = filepath.Join(homeDir, newDir[1:])
+				}
+			}
 			err := os.Chdir(newDir)
 			if err != nil {
 				fmt.Printf("cd: %s: No such file or directory\n", newDir)
