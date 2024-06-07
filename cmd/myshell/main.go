@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -11,28 +12,39 @@ import (
 func main() {
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
-		cmd, err := bufio.NewReader(os.Stdin).ReadString('\n')
-
-		commands := []string{"echo", "exit", "type"}
+		cmdLine, err := bufio.NewReader(os.Stdin).ReadString('\n')
 
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		cmd = strings.TrimSpace(cmd)
+		cmdLine = strings.TrimSpace(cmdLine)
+		cmdFields := strings.Fields(cmdLine)
+
+		if len(cmdFields) == 0 {
+			continue
+		}
+
+		cmdName := cmdFields[0]
+		cmdArgs := cmdFields[1:]
+
+		commands := []string{"echo", "exit", "type"}
 
 		switch {
-		case cmd == "exit 0":
+		case cmdName == "exit":
 			os.Exit(0)
 
-		case strings.HasPrefix(cmd, "echo "):
-			output := strings.TrimPrefix(cmd, "echo ")
-			fmt.Printf("%s\n", output)
+		case cmdName == "echo":
+			fmt.Println(strings.Join(cmdArgs, " "))
 
-		case strings.HasPrefix(cmd, "type "):
-			output := strings.TrimPrefix(cmd, "type ")
+		case cmdName == "type":
+			if len(cmdArgs) == 0 {
+				fmt.Println("type: missing operand")
+				continue
+			}
 
+			output := cmdArgs[0]
 			if contains(commands, output) {
 				fmt.Printf("%s is a shell builtin\n", output)
 			} else {
@@ -55,7 +67,30 @@ func main() {
 			}
 
 		default:
-			fmt.Printf("%s: not found\n", cmd)
+			path := os.Getenv("PATH")
+			paths := strings.Split(path, ":")
+			found := false
+			var fullPath string
+
+			for _, p := range paths {
+				fullPath = filepath.Join(p, cmdName)
+				if _, err := os.Stat(fullPath); err == nil {
+					found = true
+					break
+				}
+			}
+
+			if found {
+				execCmd := exec.Command(fullPath, cmdArgs...)
+				execCmd.Stdout = os.Stdout
+				execCmd.Stderr = os.Stderr
+				err = execCmd.Run()
+				if err != nil {
+					fmt.Printf("%s: failed to execute\n", cmdName)
+				}
+			} else {
+				fmt.Printf("%s: not found\n", cmdName)
+			}
 		}
 	}
 }
