@@ -29,16 +29,16 @@ func main() {
 		cmdName := cmdFields[0]
 		cmdArgs := cmdFields[1:]
 
-		commands := []string{"echo", "exit", "type"}
+		commands := []string{"echo", "exit", "type", "pwd"}
 
-		switch {
-		case cmdName == "exit":
+		switch cmdName {
+		case "exit":
 			os.Exit(0)
 
-		case cmdName == "echo":
+		case "echo":
 			fmt.Println(strings.Join(cmdArgs, " "))
 
-		case cmdName == "type":
+		case "type":
 			if len(cmdArgs) == 0 {
 				fmt.Println("type: missing operand")
 				continue
@@ -65,6 +65,14 @@ func main() {
 					fmt.Printf("%s: not found\n", output)
 				}
 			}
+
+		case "pwd":
+			dir, err := os.Getwd()
+			if err != nil {
+				fmt.Println("pwd: cannot get current directory")
+				continue
+			}
+			fmt.Println(dir)
 
 		default:
 			path := os.Getenv("PATH")
